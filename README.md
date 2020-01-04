@@ -1,0 +1,1 @@
+The role adopted for work with Nexus OSS repo

@@ -1,0 +1,8 @@
+---
+docker_repo_keys:
+  - dockerproject.org.key
+  - download.docker.com.gpg
+
+# For Prometheus metrics passed by Docker
+docker_metrics_address: "0.0.0.0:9323"
+...

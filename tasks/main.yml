@@ -1,0 +1,121 @@
+---
+# Add repo key for Debian
+#- name: Add Docker repo key (Debian)
+#  apt_key:
+#    url: http://{{mirror_keys}}/{{item}}
+#    state: present
+#  with_items: "{{ docker_repo_keys }}"
+#  when: ansible_os_family == "Debian"
+
+# Add repo key for RHEL
+- name: Add Docker repo key (RedHat)
+  rpm_key:
+    key: https://download.docker.com/linux/centos/gpg
+    state: present
+  when: ansible_os_family == "RedHat"
+
+# Add Docker repo for RHEL
+- name: Add Docker repository.
+  get_url:
+    url: "{{ docker_yum_repo_url }}"
+    dest: '/etc/yum.repos.d/docker-{{ docker_edition }}.repo'
+    owner: root
+    group: root
+    mode: 0644
+
+# Prepare deps on the RedHat
+- name: Install required packages for Docker (RedHat)
+  yum:
+    name:
+      - yum-utils
+      - device-mapper-persistent-data
+      - lvm2
+      - container-selinux
+    state: latest
+    update_cache: yes
+  when: ansible_os_family == "RedHat"
+
+# Install Docker
+- name: Check docker-ce package is installed (CentOS 7)
+  yum:
+    name: docker-ce
+    state: latest
+    disable_gpg_check: yes
+  when:
+    - ansible_os_family == "RedHat"
+    - ansible_distribution == "CentOS"
+    - ansible_distribution_major_version >= "7"
+
+# Add group docker
+- name: Add group "docker"
+  group:
+    name: docker
+    state: present
+
+# Add user to group docker [create users]
+- name: Ensure docker users are added to the docker group.
+  user:
+    name: "{{ item }}"
+    groups: docker
+    append: true
+  with_items: "{{ docker_users | default([]) }}"
+
+# Check is the data dir Docker exist
+- name: Check data dir Docker
+  file:
+    path: "{{ docker_data_root }}"
+    state: directory
+
+- name: Create root docker client config directory
+  file:
+    path: /root/.docker
+    state: directory
+    mode: 0700
+
+- name: Copy root docker client config
+  template:
+    src: config.json.j2
+    dest: /root/.docker/config.json
+    mode: 0600
+
+- name: Create jenkins docker client config directory
+  file:
+    path: /var/lib/jenkins/.docker
+    state: directory
+    mode: 0700
+    owner: jenkins
+    group: jenkins
+  when: '"ciservers" in group_names or "ciservers_slave" in group_names'
+
+- name: Copy jenkins docker client config
+  template:
+    src: config.json.j2
+    dest: /var/lib/jenkins/.docker/config.json
+    mode: 0600
+    owner: jenkins
+    group: jenkins
+  when: '"ciservers" in group_names or "ciservers_slave" in group_names'
+
+# Redefine SystemD params
+- name: Config Docker daemon (RedHat)
+  lineinfile:
+    path: /usr/lib/systemd/system/docker.service
+    regexp: "^ExecStart=/usr/bin/dockerd.*$"
+    line: "ExecStart=/usr/bin/dockerd --data-root {{ docker_data_root }} --registry-mirror {{ docker_registry_mirror }} {{ docker_insecure_registry }} --metrics-addr {{ docker_metrics_address }} --experimental"
+    state: present
+    backup: yes
+  when:
+    - ansible_os_family == "RedHat"
+    - ansible_distribution_major_version >= "7"
+
+# For SystemD just force systemd to reread configs (SystemD)
+- name: Just force systemd to reread configs (SystemD)
+  systemd:
+    name: docker
+    daemon_reload: yes
+    state: restarted
+  when: (ansible_os_family == "Debian" and ansible_distribution_major_version >= "9") or (ansible_os_family == "RedHat" and ansible_distribution_major_version >= "7")
+#   notify:
+#   - restart docker
+
+...
