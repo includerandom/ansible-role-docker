@@ -1,9 +1,9 @@
 {
         "auths": {
-        {% for hosts in docker_private_repo_auth_hosts  %}
+{% for hosts in docker_private_repo_auth_hosts  %}
                 "{{ hosts }}": {
                         "auth": "{{ docker_private_repo_auth_hash }}"
                 },
-        {% endfor %}
+{% endfor %}
         }
 }
