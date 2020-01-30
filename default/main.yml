@@ -3,9 +3,9 @@ docker_edition: ce #or ee
 
 # Define and enable repo by this role
 docker_repo_enable: true
-docker_mirror_host: "https://download.docker.com"
-docker_mirror_host_key: "{{ docker_mirror_host }}linux/{{ (ansible_distribution == "Centos") | ternary("centos","debian") }}/gpg"
-docker_yum_repo_url: "{{ docker_mirror_host }}/linux/{{ (ansible_distribution == "Fedora") | ternary("fedora","centos") }}/docker-{{ docker_edition }}"
+docker_mirror_host: https://download.docker.com
+docker_mirror_host_key: '{{ docker_mirror_host }}/linux/{{ (ansible_distribution == "Centos") | ternary("centos","debian") }}/gpg'
+docker_mirror_host_yum: '{{ docker_mirror_host }}/linux/{{ ansible_os_family }}/{{ ansible_distribution_major_version }}/$basearch/stable'
 
 # For Prometheus metrics passed by Docker
 docker_metrics_address: "0.0.0.0:9323"
