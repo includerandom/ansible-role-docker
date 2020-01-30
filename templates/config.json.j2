@@ -2,7 +2,7 @@
         "auths": {
 {% for regestry in docker_private_repo_auth_hosts  %}
                 "{{ regestry.host }}": {
-                        "auth": "{{ registry.hash }}"
+                        "auth": "{{ regestry.hash }}"
                 },
 {% endfor %}
         }
