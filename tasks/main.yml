@@ -10,7 +10,7 @@
 # Add repo key for RHEL
 - name: Add Docker repo key (RedHat)
   rpm_key:
-    key: http://"{{ docker_mirror_host_key }}"
+    key: "{{ docker_mirror_host_key }}"
     state: present
   when: ansible_os_family == "RedHat" and docker_repo_enable
 
