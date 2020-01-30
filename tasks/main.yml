@@ -1,27 +1,29 @@
 ---
 # Add repo key for Debian
-#- name: Add Docker repo key (Debian)
-#  apt_key:
-#    url: http://{{mirror_keys}}/{{item}}
-#    state: present
-#  with_items: "{{ docker_repo_keys }}"
-#  when: ansible_os_family == "Debian"
+- name: Add Docker repo key (Debian)
+  apt_key:
+    url: http://{{ docker_mirror_host_key }}/{{ item }}
+    state: present
+  with_items: "{{ docker_repo_keys }}"
+  when: ansible_os_family == "Debian" and docker_repo_enable
 
 # Add repo key for RHEL
 - name: Add Docker repo key (RedHat)
   rpm_key:
-    key: https://download.docker.com/linux/centos/gpg
+    key: http://{{ docker_mirror_host_key }}
     state: present
-  when: ansible_os_family == "RedHat"
+  when: ansible_os_family == "RedHat" and docker_repo_enable
 
 # Add Docker repo for RHEL
-- name: Add Docker repository.
-  get_url:
-    url: "{{ docker_yum_repo_url }}"
-    dest: '/etc/yum.repos.d/docker-{{ docker_edition }}.repo'
-    owner: root
-    group: root
-    mode: 0644
+- name: Add Docker repository (RedHat).
+  yum_repository:
+    name: mirror_Docker_CE_RHEL{{ansible_distribution_major_version}}
+    description: Docker CE repo for Enterprise Linux $releasever ($basearch)
+    file: docker_{{ docker_edition }}
+    baseurl: http://{{ docker_mirror_host_yum }}
+    gpgcheck: yes
+    enabled: yes
+  when: ansible_os_family == "RedHat" and docker_repo_enable
 
 # Prepare deps on the RedHat
 - name: Install required packages for Docker (RedHat)
