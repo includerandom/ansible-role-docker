@@ -20,7 +20,7 @@
     name: mirror_Docker_CE_RHEL{{ansible_distribution_major_version}}
     description: Docker CE repo for Enterprise Linux $releasever ($basearch)
     file: docker_{{ docker_edition }}
-    baseurl: http://{{ docker_mirror_host_yum }}
+    baseurl: "{{ docker_mirror_host_yum }}"
     gpgcheck: yes
     enabled: yes
   when: ansible_os_family == "RedHat" and docker_repo_enable
