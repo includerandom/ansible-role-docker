@@ -16,14 +16,14 @@
   with_items: "{{ docker_users }}"
 
 - name: Copy docker client config into user home
-  template:
-    src: config.json.j2
+  copy:
+    content: "{{ docker_config_json | to_nice_json(indent=2) }}"
     dest: "~{{ item }}/.docker/config.json"
     mode: 0600
     owner: "{{ item }}"
     group: "{{ item }}"
   with_items: "{{ docker_users }}"
-  register: docker_config_json
-  changed_when: docker_config_json.changed
+  register: docker_config_json_apply
+  changed_when: docker_config_json_apply.changed
   notify: restart docker
   when: docker_private_repo_auth_host | length > 0
