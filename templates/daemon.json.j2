@@ -1,16 +1,16 @@
 {
-    {% if docker_custom_registry | length > 0 %}
-    {% for mirror in docker_custom_registry %}
+{% if docker_custom_registry | length > 0 %}
+{% for mirror in docker_custom_registry %}
     "registry-mirrors": [
         "{{ mirror }}",
     ],
-    {% endfor %}
-    {% endif %}
-    {% if docker_private_repo_auth_host | length > 0 %}
-    {% for regestry in docker_private_repo_auth_host  %}
+{% endfor %}
+{% endif %}
+{% if docker_private_repo_auth_host | length > 0 %}
+{% for regestry in docker_private_repo_auth_host  %}
     insecure-registries": [
     "{{ regestry.host }}",
     ],
-    {% endfor %}
-    {% endif %}
+{% endfor %}
+{% endif %}
 }
