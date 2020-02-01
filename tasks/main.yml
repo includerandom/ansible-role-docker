@@ -25,14 +25,14 @@
     name: docker
     state: present
 
-- name: Config Docker via daemon.json
+- name: Configure Docker via daemon.json
   copy:
     content: "{{ docker_daemon_json | to_nice_json(indent=2) }}"
     dest: /etc/docker/daemon.json
   register: docker_daemon_json_apply
   changed_when: docker_daemon_json_apply.changed
   notify: restart docker
-  when: docker_private_repo_auth_host | length > 0 or docker_custom_registry | length > 0
+  when: docker_private_repo_auth_host | length > 0
 
 - name: Ensure Docker is started and enabled at boot.
   systemd:
