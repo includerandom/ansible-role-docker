@@ -23,7 +23,7 @@
     owner: "{{ item }}"
     group: "{{ item }}"
   with_items: docker_users
-  register: docker_daemon_json
-  changed_when: docker_daemon_json.changed
+  register: docker_config_json
+  changed_when: docker_config_json.changed
   notify: restart docker
   when: docker_private_repo_auth_host | length > 0
