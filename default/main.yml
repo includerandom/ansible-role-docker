@@ -30,7 +30,7 @@ docker_apt_ignore_key_error: true
 
 # A list of users who will be added to the docker group.
 docker_users: []
-#  - root
+#  - developer
 #  - jenkins
 
 # Define variables for auth in private repo
