@@ -2,7 +2,7 @@
 {% if docker_custom_registry | length > 0 %}
 {% for mirror in docker_custom_registry %}
     "registry-mirrors": [
-        "{{ mirror }}",
+        "{{ mirror.host }}",
     ],
 {% endfor %}
 {% endif %}
