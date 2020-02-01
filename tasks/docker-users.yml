@@ -17,7 +17,7 @@
 
 - name: Copy docker client config into user home
   copy:
-    content: "{{ docker_config_json | to_nice_json(indent=8) }}"
+    content: "{{ docker_config_json | to_nice_json }}"
     dest: "~{{ item }}/.docker/config.json"
     mode: 0600
     owner: "{{ item }}"
