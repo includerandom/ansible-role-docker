@@ -26,11 +26,11 @@
     state: present
 
 - name: Config Docker via daemon.json
-  template:
-    src: daemon.json.j2
+  copy:
+    content: "{{ docker_daemon_json | to_nice_json(indent=2) }}"
     dest: /etc/docker/daemon.json
-  register: docker_daemon_json
-  changed_when: docker_daemon_json.changed
+  register: docker_daemon_json_apply
+  changed_when: docker_daemon_json_apply.changed
   notify: restart docker
   when: docker_private_repo_auth_host | length > 0 or docker_custom_registry | length > 0
 

@@ -32,16 +32,23 @@ docker_apt_ignore_key_error: true
 docker_users: []
 #  - developer
 #  - jenkins
+#  - root
 
-# Define variables for auth in private repo
+# Define variables for auth in private repo via config.json in docker user home
 docker_private_repo_auth_host:
   - host: repo.inf.example.host
     hash: "{{ docker_private_repo_auth_hash }}"
   - host: repo2.inf.example.host
     hash: "{{ docker_private_repo_auth_hash }}"
 
-# Define address of local binary custom repo with mirrors
-docker_custom_registry: "http://{{ docker_private_repo_auth_host }}:9080"
+# Define docker daemon parameters via daemon.json file
+docker_daemon_json:
+  insecure-resgitsry:
+    - repo.inf.example.host
+    - repo2.inf.example.host
+  docker_custom_registry:
+    registry-mirrors:
+      - "http://repo2.inf.example.host:9080"
 
 # Define partition with docker data
 docker_data_root: /var/lib/docker
