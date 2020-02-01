@@ -35,20 +35,19 @@ docker_users: []
 #  - root
 
 # Define variables for auth in private repo via config.json in docker user home
-docker_private_repo_auth_host:
-  - host: repo.inf.example.host
-    hash: "{{ docker_private_repo_auth_hash }}"
-  - host: repo2.inf.example.host
-    hash: "{{ docker_private_repo_auth_hash }}"
+docker_private_repo_auth_host: []
+#  - host: repo.inf.example.host
+#    hash: "{{ docker_private_repo_auth_hash }}"
+#  - host: repo2.inf.example.host
+#    hash: "{{ docker_private_repo_auth_hash }}"
 
 # Define docker daemon parameters via daemon.json file
-docker_daemon_json:
-  insecure-resgitsry:
-    - repo.inf.example.host
-    - repo2.inf.example.host
-  docker_custom_registry:
-    registry-mirrors:
-      - "http://repo2.inf.example.host:9080"
+docker_daemon_json: []
+#  insecure-registries:
+#    - repo.inf.example.host
+#    - repo2.inf.example.host
+#    registry-mirrors:
+#      - http://repo2.inf.example.host:9080
 
 # Define partition with docker data
 docker_data_root: /var/lib/docker
