@@ -1,8 +1,5 @@
 ---
 - name: restart docker
-  systemd:
-    state: restarted
-    daemon_reload: yes
+  service:
     name: docker
-  become: true
-...
+    state: "{{ docker_restart_handler_state }}"

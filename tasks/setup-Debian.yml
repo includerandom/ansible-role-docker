@@ -1,0 +1,20 @@
+---
+- name: Ensure old versions of Docker are not installed.
+  package:
+    name:
+      - docker
+      - docker-engine
+    state: absent
+
+- name: Ensure curl is present (on older systems without SNI).
+  package:
+    name:
+      - curl
+    state: present
+  when: add_repository_key is failed
+
+- name:
+  apt:
+    name:
+      - "{{ docker_package }}"
+    state: "{{ docker_package_state }}"

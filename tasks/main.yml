@@ -1,106 +1,41 @@
 ---
-# Add repo key for Debian
-- name: Add Docker repo key (Debian)
-  apt_key:
-    url: http://{{ docker_mirror_host_key }}/{{ item }}
-    state: present
-  with_items: "{{ docker_repo_keys }}"
-  when: ansible_os_family == "Debian" and docker_repo_enable | default('false')
+- include_tasks: repo-RedHat.yml
+  when: ansible_os_family == 'RedHat' and docker_install_repo | default('true')
 
-# Add repo key for RHEL
-- name: Add Docker repo key (RedHat)
-  rpm_key:
-    key: "{{ docker_mirror_host_key }}"
-    state: present
-  when: ansible_os_family == "RedHat" and docker_repo_enable | default('false')
+- include_tasks: setup-RedHat.yml
+  when: ansible_os_family == 'RedHat'
 
-# Add Docker repo for RHEL
-- name: Add Docker repository (RedHat).
-  yum_repository:
-    name: mirror_Docker_CE_RHEL{{ansible_distribution_major_version}}
-    description: Docker CE repo for Enterprise Linux $releasever ($basearch)
-    file: docker_{{ docker_edition }}
-    baseurl: "{{ docker_mirror_host_yum }}"
-    gpgcheck: yes
-    enabled: yes
-  when: ansible_os_family == "RedHat" and docker_repo_enable | default('false')
+- include_tasks: repo-Debian.yml
+  when: ansible_os_family == 'Debian' and docker_install_repo | default('true')
 
-# Prepare deps on the RedHat
-- name: Install required packages for Docker (RedHat)
-  yum:
-    name:
-      - yum-utils
-      - device-mapper-persistent-data
-      - lvm2
-      - container-selinux
-    state: present
-  when: ansible_os_family == "RedHat"
+- include_tasks: setup-Debian.yml
+  when: ansible_os_family == 'Debian'
 
-# Install Docker
-- name: Check docker-ce package is installed (CentOS 7)
-  yum:
-    name: docker-ce
-    state: present
-  when:
-    - ansible_os_family == "RedHat"
-    - ansible_distribution == "CentOS"
-    - ansible_distribution_major_version >= "7"
-    - docker_edition == "ce" | default('ce')
+- include_tasks: docker-users.yml
+  when: docker_users | length > 0
 
-# Check is the data dir Docker exist
 - name: Check data dir Docker
   file:
     path: "{{ docker_data_root }}"
     state: directory
   when: docker_data_root | length > 0
 
-# Add group docker
 - name: Add group "docker"
   group:
     name: docker
     state: present
 
-- name: Ensure docker users are added to the docker group.
-  user:
-    name: "{{ item.key }}"
-    groups: docker
-    append: true
-  with_dict: "{{ docker_users | default([]) }}"
-  when: docker_users | length > 0
-
-- name: Create docker config dir in users home
-  file:
-    path: "{{ docker_users.value | default([]) }}"
-    state: directory
-    owner: "{{ docker_users.key | default([]) }}"
-    group: "{{ docker_users.key | default([]) }}"
-    mode: 0700
-  when: docker_users | length > 0 and docker_users | length > 0
-  register: docker_users_dir
-
-- name: Copy docker client config into user home
-  template:
-    src: config.json.j2
-    dest: "{{ docker_users.value }}/config.json"
-    mode: 0600
-    owner: "{{ docker_users.key | default([]) }}"
-    group: "{{ docker_users.key | default([]) }}"
-  when: docker_users_dir.exist
-
-# Add daemon.json file
-- name: Config Docker via daemon.json (RedHat)
+- name: Config Docker via daemon.json
   template:
     src: daemon.json.j2
     dest: /etc/docker/daemon.json
-  when:
-    - ansible_os_family == "RedHat"
-    - ansible_distribution_major_version >= "7"
   register: docker_daemon_json
+  changed_when: docker_daemon_json.changed
+  notify: restart docker
+  when: docker_private_repo_auth_host | length > 0 or docker_custom_registry | length > 0
 
-# For SystemD just force systemd to reread configs (SystemD)
-- name: Just restart systemd docker unit to reread configs
+- name: Ensure Docker is started and enabled at boot.
   systemd:
     name: docker
-    daemon_reload: yes
-    state: restarted
-  when: (ansible_os_family == "Debian" and ansible_distribution_major_version >= "9") or (ansible_os_family == "RedHat" and ansible_distribution_major_version >= "7") and not docker_daemon_json.changed
+    state: "{{ docker_service_state }}"
+    enabled: "{{ docker_service_enabled }}"

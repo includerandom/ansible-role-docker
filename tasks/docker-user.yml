@@ -1,0 +1,29 @@
+---
+- name: Ensure docker users are added to the docker group.
+  user:
+    name: "{{ item }}"
+    groups: docker
+    append: true
+  with_items: docker_users
+
+- name: Create docker config dir in users home
+  file:
+    path: "~{{ item }}/.docker"
+    state: directory
+    owner: "{{ item }}"
+    group: "{{ item }}"
+    mode: 0700
+  with_items: docker_users
+
+- name: Copy docker client config into user home
+  template:
+    src: config.json.j2
+    dest: "~{{ item }}/.docker/config.json"
+    mode: 0600
+    owner: "{{ item }}"
+    group: "{{ item }}"
+  with_items: docker_users
+  register: docker_daemon_json
+  changed_when: docker_daemon_json.changed
+  notify: restart docker
+  when: docker_private_repo_auth_host | length > 0
