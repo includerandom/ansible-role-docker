@@ -26,4 +26,4 @@
   register: docker_config_json_apply
   changed_when: docker_config_json_apply.changed
   notify: restart docker
-  when: docker_private_repo_auth_host | length > 0
+  when: docker_config_json | length > 0
