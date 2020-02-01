@@ -1,6 +1,6 @@
 {
-    {% if docker_registry_mirror | length > 0 %}
-    {% for mirror in docker_registry_mirror %}
+    {% if docker_custom_registry | length > 0 %}
+    {% for mirror in docker_custom_registry %}
     "registry-mirrors": [
         "{{ mirror.host }}",
     ],
