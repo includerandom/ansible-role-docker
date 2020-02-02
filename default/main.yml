@@ -34,12 +34,14 @@ docker_users: []
 #  - jenkins
 #  - root
 
-# Define variables for auth in private repo via config.json in docker user home
-docker_private_repo_auth_host: []
-#  - host: repo.inf.example.host
-#    hash: "{{ docker_private_repo_auth_hash }}"
-#  - host: repo2.inf.example.host
-#    hash: "{{ docker_private_repo_auth_hash }}"
+# Define auth parameters in private registry via config.json
+docker_config_json: []
+#  auths:
+#    "registry.example.com:5000":
+#      auth: "SomeHashHere"
+#    "registry.example.com:5001":
+#      auth: "SomeHashHere"
+
 
 # Define docker daemon parameters via daemon.json file
 docker_daemon_json: []
